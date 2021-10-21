@@ -4,10 +4,10 @@ bool trying_to_get_in = false;
 bool trying_to_get_out = false;
 unsigned long time_now = 0;
 int count = 0;
-bool alreadyrun = false;
-bool mod5 = false;
+bool alreadyrun, countmod = false;
 int x;
-int led = 9;
+int relay = 9;
+long time_add_3;
 
 
 LCD_I2C lcd(0x27); // Default address of most PCF8574 modules, change accordingly
@@ -19,8 +19,15 @@ const int echoPin2 = 8; // Echo Pin of Ultrasonic Sensor
 void setup() {
   // put your setup code here, to run once:
 //  lcd.backlight();
-  pinMode(led, OUTPUT);
   Serial.begin(9600);
+   pinMode(pingPin2, OUTPUT);
+   digitalWrite(pingPin2, LOW);
+   delayMicroseconds(2);
+   digitalWrite(pingPin2, HIGH);
+   delayMicroseconds(10);
+   digitalWrite(pingPin2, LOW);
+   pinMode(echoPin2, INPUT);
+   pinMode(relay, OUTPUT);
   Serial.print("initializing");
   delay(2000);
 //  lcd.clear();
@@ -48,14 +55,8 @@ void loop() {
    inches = microsecondsToInches(duration);
    int d1 = microsecondsToCentimeters(duration);
    //---------------------------------------------------
-          long duration2, inches2, cm2;
-   pinMode(pingPin2, OUTPUT);
-   digitalWrite(pingPin2, LOW);
-   delayMicroseconds(2);
-   digitalWrite(pingPin2, HIGH);
-   delayMicroseconds(10);
-   digitalWrite(pingPin2, LOW);
-   pinMode(echoPin2, INPUT);
+   long duration2, inches2, cm2;
+
    duration2= pulseIn(echoPin2, HIGH);
    inches2 = microsecondsToInches(duration2);
    int d2 = microsecondsToCentimeters(duration2);
@@ -73,26 +74,22 @@ void loop() {
    //Print count value
    Serial.print("Count: ");
    Serial.println(count);
+  if((count%10) == 0){
+    countmod = true;
+    x= getTimeAdd3();
+  }
 
-   if((count%15) == 0){
-     if (alreadyrun == false){
-    x = gett1();
-    }
-    
-    mod5 = true;
-   }
-   if(mod5){
-    if(x > time_now){
-      digitalWrite(led, HIGH);
-      time_now = millis();
+  if (countmod){
+    if(x>millis()){
+      digitalWrite(relay, HIGH);
+      Serial.println("Led On");
     }
     else{
-      alreadyrun = false;
-      mod5 = false;
-//      digitalWrite(led, LOW);
+      digitalWrite(relay, LOW);
+      Serial.println("Led Off");
     }
-   }
-    
+  }
+
  
    
    
@@ -115,7 +112,6 @@ void loop() {
   trying_to_get_out = false;
   delay(500);
  }
- delay(1000);
  count ++;
 }
 
@@ -128,8 +124,8 @@ long microsecondsToCentimeters(long microseconds) {
    return microseconds / 29 / 2;
 }
 
-int gett1(){
-  int t1 = millis() + 3000;
+int getTimeAdd3(){
+  time_add_3 = millis() + 3000;
   alreadyrun = true;
-  return t1;
+  return time_add_3;
 }
