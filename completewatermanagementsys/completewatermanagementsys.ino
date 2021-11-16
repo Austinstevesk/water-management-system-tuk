@@ -15,10 +15,10 @@ float totalLitres;
 bool trying_to_get_in = false;
 bool trying_to_get_out = false;
 int count = 0;
-bool alreadyrun, countmod = false;
+bool countmod = false;
 int x;
 int led = 9;
-long time_add_3;
+long desired_stop_millis;
 
 
 //LCD_I2C lcd(0x27); // Default address of most PCF8574 modules, change accordingly
@@ -136,7 +136,7 @@ Serial.println("Count: "+ count);
    Serial.println(count);
   if((count%10) == 0){
     countmod = true;
-    x= getTimeAdd3();
+    x= getTimeAddSecs();
   }
 
   if (countmod){
@@ -147,6 +147,7 @@ Serial.println("Count: "+ count);
     else{
       digitalWrite(led, LOW);
       Serial.println("Led Off");
+      countmod = false;
     }
   }
 
@@ -172,7 +173,6 @@ Serial.println("Count: "+ count);
   trying_to_get_out = false;
   delay(500);
  }
- count ++;
 }
 
 
@@ -184,8 +184,7 @@ long microsecondsToCentimeters(long microseconds) {
    return microseconds / 29 / 2;
 }
 
-int getTimeAdd3(){
-  time_add_3 = millis() + 3000;
-  alreadyrun = true;
-  return time_add_3;
+int getTimeAddSecs(){
+  desired_stop_millis = millis() + 3000;
+  return desired_stop_millis;
 }
